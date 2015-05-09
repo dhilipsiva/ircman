@@ -110,9 +110,9 @@ class UserServer(Model):
     server = ForeignKey(Server, related_name="user_servers")
     label = CharField(max_length=256, default="My IRC Server")
     username = CharField(max_length=256)
-    password = CharField(max_length=256)
+    password = CharField(max_length=256, null=True, blank=True)
     nickname = CharField(max_length=256)
-    realname = CharField(max_length=256)
+    realname = CharField(max_length=256, null=True, blank=True)
 
 
 class Channel(Model):
@@ -124,26 +124,23 @@ class Channel(Model):
         Dictify user
         """
         return {
-            'id': str(self.uuid),
-            'nickname': self.nickname,
-            'username': self.username,
             'port': self.port,
         }
 
     def __str__(self):
-        return "%s - %s" % (self.server, self.username)
+        return "%s - %s" % (self.server, self.name)
 
     def __repr__(self):
-        return "<Account: %s>" % self.__str__()
+        return "<Channel: %s>" % self.__str__()
 
 
 class UserChannel(Model):
     user_server = ForeignKey(UserServer, related_name="user_channels")
     channel = ForeignKey(Channel, related_name="user_channels")
     nickname = CharField(max_length=256)
-    password = CharField(max_length=256)
+    password = CharField(max_length=256, null=True, blank=True)
     uuid = UUIDField(default=uuid4, editable=False, db_index=True)
-    mode = CharField(max_length=16, default="")
+    mode = CharField(max_length=16, null=True, blank=True)
 
 
 class BaseMessage(Model):
