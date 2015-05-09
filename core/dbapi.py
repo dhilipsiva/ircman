@@ -84,3 +84,13 @@ def get_channel(channel_id):
         return Channel.objects.get(id=channel_id)
     except Channel.DoesNotExist:
         return None
+
+
+def get_conversation(conversation_id):
+    """
+    Get a channel by ID
+    """
+    try:
+        return Conversation.objects.get(id=conversation_id)
+    except Conversation.DoesNotExist:
+        return None

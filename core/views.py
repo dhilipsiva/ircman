@@ -23,7 +23,7 @@ from django.http import JsonResponse, Http404
 from tokenapi.decorators import token_required
 
 from core.dbapi import get_user_servers, get_user_channels, \
-    get_conversations, get_channel
+    get_conversations, get_channel, get_conversation
 
 
 @token_required
@@ -61,4 +61,17 @@ def channel(request, channel_id):
         return Http404
     return JsonResponse({
         'channel': channel.to_dict(),
+    })
+
+
+@token_required
+def conversation(request, conversation_id):
+    """
+    Get channel data
+    """
+    conversation = get_conversation(conversation_id=conversation_id)
+    if not conversation:
+        raise Http404
+    return JsonResponse({
+        'conversation': conversation.to_dict(),
     })

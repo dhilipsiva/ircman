@@ -272,6 +272,7 @@ class PrivateMessage(BaseMessage):
             'userChannel': str(self.user_channel_id),
             'read': self.read,
         })
+        return d
 
     def __repr__(self):
         return "<PrivateMessage: %s>" % self.__str__()
