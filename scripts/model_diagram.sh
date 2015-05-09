@@ -5,5 +5,4 @@
 #
 # Distributed under terms of the MIT license.
 #
-
-python manage.py graph_models core -o generated/models.png
+python manage.py graph_models core -o generated/model-$(date +"%m-%d-%y-%H-%M-%S").png
