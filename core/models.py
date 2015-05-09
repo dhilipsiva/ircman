@@ -46,6 +46,7 @@ class User(AbstractUser):
     A custom user so that we can add permissions easily
     """
     uuid = UUIDField(default=uuid4, editable=False)
+    socket_uuid = UUIDField(default=uuid4, editable=False)
 
     class Meta(AbstractUser.Meta):
         abstract = False
@@ -62,14 +63,14 @@ class User(AbstractUser):
         Dictify user
         """
         d = {
-            'id': self.uuid,
+            'id': str(self.uuid),
             'username': self.username,
-            'first_name': self.first_name,
-            'last_name': self.last_name,
+            'firstName': self.first_name,
+            'lastName': self.last_name,
         }
         if with_sensitive_data:
             d.update({
-                'uuid': str(self.uuid),
+                'socketUuid': str(self.socket_uuid),
                 'email': self.email,
             })
         return d
@@ -90,7 +91,7 @@ class Server(Model):
         Dictify user
         """
         return {
-            'id': self.uuid,
+            'id': str(self.uuid),
             'host': self.host,
         }
 
@@ -114,7 +115,7 @@ class Account(Model):
         Dictify user
         """
         return {
-            'id': self.uuid,
+            'id': str(self.uuid),
             'nickname': self.nickname,
             'username': self.username,
             'port': self.port,
@@ -138,7 +139,7 @@ class Message(Model):
         Dictify user
         """
         return {
-            'id': self.uuid,
+            'id': str(self.uuid),
             'text': self.text,
             'fromAccount': self.from_account_id,
         }
@@ -159,7 +160,6 @@ class PrivateMessage(Message):
         """
         d = super(PrivateMessage, self).to_dict()
         d.update({
-            'text': self.text,
             'toAcount': self.to_acount_id,
         })
 
