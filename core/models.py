@@ -158,7 +158,8 @@ class Channel(Model):
 
 class UserChannel(Model):
     id = UUIDField(primary_key=True, default=uuid4, editable=False)
-    user_server = ForeignKey(UserServer, related_name="user_channels")
+    user_server = ForeignKey(
+        UserServer, related_name="user_channels", null=True)
     channel = ForeignKey(Channel, related_name="user_channels")
     nickname = CharField(max_length=256)
     password = CharField(max_length=256, null=True, blank=True)
@@ -222,9 +223,13 @@ class Message(BaseMessage):
         """
         d = super(Message, self).to_dict()
         d.update({
-            'fromAccount': self.from_account_id,
+            'channelId': str(self.channel_id),
+            'userChannelId': str(self.user_channel_id),
         })
         return d
+
+    def __str__(self):
+        return "%s" % self.text
 
     def __repr__(self):
         return "<Message: %s>" % self.__str__()

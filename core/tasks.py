@@ -23,20 +23,25 @@ __status__ = "development"
 
 from celery import shared_task
 
-from node.notify import setup_client
+from node.notify import setup_client, notify_message_new
 
-from core.dbapi import get_all_user_channels
+from core.dbapi import get_all_user_channels, create_message, \
+    get_users_for_channel_id
 
 
 @shared_task
 def init():
     for uc in get_all_user_channels():
-        setup_client(uc.to_dict_deep())
+        if uc.user_server:
+            setup_client(uc.to_dict_deep())
 
 
 @shared_task
 def message(sender, channel_id, text, user_channel_id):
-    print sender, channel_id, text, user_channel_id
+    message = create_message(sender, channel_id, text, user_channel_id)
+    users = get_users_for_channel_id(channel_id)
+    rooms = list(set([str(u.socket) for u in users]))
+    return notify_message_new(rooms, message.to_dict())
 
 
 @shared_task

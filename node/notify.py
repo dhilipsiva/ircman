@@ -34,12 +34,12 @@ def _redis_call(channel, data, rooms, event):
     """
     docstring for notify
     """
-    message = dumps({
+    toast = dumps({
         'rooms': rooms,
         'event': event,
         'data': data,
     }, cls=DjangoJSONEncoder)
-    return redis.publish(channel, message)
+    return redis.publish(channel, toast)
 
 
 def notify(rooms, event, data):
@@ -49,35 +49,42 @@ def notify(rooms, event, data):
     return _redis_call('notify', data, rooms, event)
 
 
-def notify_message(rooms, message, notify_type=NotifyEnum.INFO):
+def notify_message_new(rooms, data):
     """
-    Send a message to the user
+    docstring for notify_message
+    """
+    return notify(rooms, 'message_new', data)
+
+
+def notify_toast(rooms, toast, notify_type=NotifyEnum.INFO):
+    """
+    Send a toast to the user
     """
     data = {
-        "message": message,
+        "toast": toast,
         "notifyType": notify_type
     }
-    return notify(rooms, "message", data)
+    return notify(rooms, "toast", data)
 
 
-def notify_message_info(rooms, message):
-    return notify_message(rooms, message, NotifyEnum.INFO)
+def notify_toast_info(rooms, toast):
+    return notify_toast(rooms, toast, NotifyEnum.INFO)
 
 
-def notify_message_success(rooms, message):
-    return notify_message(rooms, message, NotifyEnum.SUCCESS)
+def notify_toast_success(rooms, toast):
+    return notify_toast(rooms, toast, NotifyEnum.SUCCESS)
 
 
-def notify_message_warning(rooms, message):
-    return notify_message(rooms, message, NotifyEnum.WARNING)
+def notify_toast_warning(rooms, toast):
+    return notify_toast(rooms, toast, NotifyEnum.WARNING)
 
 
-def notify_message_alert(rooms, message):
-    return notify_message(rooms, message, NotifyEnum.ALERT)
+def notify_toast_alert(rooms, toast):
+    return notify_toast(rooms, toast, NotifyEnum.ALERT)
 
 
-def notify_message_error(rooms, message):
-    return notify_message(rooms, message, NotifyEnum.ERROR)
+def notify_toast_error(rooms, toast):
+    return notify_toast(rooms, toast, NotifyEnum.ERROR)
 
 
 def setup_client(data):
