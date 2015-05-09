@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from django.db import models, migrations
 import django.contrib.auth.models
 import django.utils.timezone
+from django.conf import settings
 import django.core.validators
 import uuid
 
@@ -30,6 +31,7 @@ class Migration(migrations.Migration):
                 ('is_active', models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='active')),
                 ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
                 ('uuid', models.UUIDField(default=uuid.uuid4, editable=False)),
+                ('socket_uuid', models.UUIDField(default=uuid.uuid4, editable=False)),
                 ('groups', models.ManyToManyField(related_query_name='user', related_name='user_set', to='auth.Group', blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', verbose_name='groups')),
                 ('user_permissions', models.ManyToManyField(related_query_name='user', related_name='user_set', to='auth.Permission', blank=True, help_text='Specific permissions for this user.', verbose_name='user permissions')),
             ],
@@ -60,7 +62,25 @@ class Migration(migrations.Migration):
                 ('text', models.TextField()),
                 ('uuid', models.UUIDField(default=uuid.uuid4, editable=False)),
                 ('created_on', models.DateTimeField(auto_now_add=True)),
+                ('from_account', models.ForeignKey(related_name='messages_sent', to='core.Account')),
             ],
+            options={
+                'abstract': False,
+            },
+        ),
+        migrations.CreateModel(
+            name='PrivateMessage',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('text', models.TextField()),
+                ('uuid', models.UUIDField(default=uuid.uuid4, editable=False)),
+                ('created_on', models.DateTimeField(auto_now_add=True)),
+                ('from_account', models.ForeignKey(related_name='private_messages_sent', to='core.Account')),
+                ('to_account', models.ForeignKey(related_name='private_messages_received', to='core.Account')),
+            ],
+            options={
+                'abstract': False,
+            },
         ),
         migrations.CreateModel(
             name='Server',
@@ -70,26 +90,19 @@ class Migration(migrations.Migration):
                 ('uuid', models.UUIDField(default=uuid.uuid4, editable=False)),
             ],
         ),
-        migrations.CreateModel(
-            name='PrivateMessage',
-            fields=[
-                ('message_ptr', models.OneToOneField(parent_link=True, auto_created=True, primary_key=True, serialize=False, to='core.Message')),
-            ],
-            bases=('core.message',),
-        ),
         migrations.AddField(
             model_name='message',
-            name='from_account',
-            field=models.ForeignKey(to='core.Account'),
+            name='to_server',
+            field=models.ForeignKey(related_name='messages_received', to='core.Server'),
         ),
         migrations.AddField(
             model_name='account',
             name='server',
-            field=models.ForeignKey(to='core.Server'),
+            field=models.ForeignKey(related_name='accounts', to='core.Server'),
         ),
         migrations.AddField(
-            model_name='privatemessage',
-            name='to_account',
-            field=models.ForeignKey(to='core.Account'),
+            model_name='account',
+            name='user',
+            field=models.ForeignKey(related_name='accounts', to=settings.AUTH_USER_MODEL),
         ),
     ]

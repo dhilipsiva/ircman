@@ -103,8 +103,8 @@ class Server(Model):
 
 
 class Account(Model):
-    server = ForeignKey(Server)
-    user = ForeignKey(User)
+    server = ForeignKey(Server, related_name="accounts")
+    user = ForeignKey(User, related_name="accounts")
     nickname = CharField(max_length=256)
     username = CharField(max_length=256)
     password = CharField(max_length=256)
@@ -129,10 +129,9 @@ class Account(Model):
         return "<Account: %s>" % self.__str__()
 
 
-class Message(Model):
+class BaseMessage(Model):
     text = TextField()
     uuid = UUIDField(default=uuid4, editable=False)
-    from_account = ForeignKey(Account)
     created_on = DateTimeField(auto_now_add=True)
 
     def to_dict(self):
@@ -142,18 +141,34 @@ class Message(Model):
         return {
             'id': str(self.uuid),
             'text': self.text,
-            'fromAccount': self.from_account_id,
+            'createdOn': self.created_on,
         }
 
-    def __str__(self):
-        return self.text
+    class Meta:
+        abstract = True
+
+
+class Message(BaseMessage):
+    from_account = ForeignKey(Account, related_name="messages_sent")
+    to_server = ForeignKey(Server, related_name="messages_received")
+
+    def to_dict(self):
+        """
+        Dictify user
+        """
+        d = super(Message, self).to_dict()
+        d.update({
+            'fromAccount': self.from_account_id,
+        })
+        return d
 
     def __repr__(self):
         return "<Message: %s>" % self.__str__()
 
 
-class PrivateMessage(Message):
-    to_account = ForeignKey(Account)
+class PrivateMessage(BaseMessage):
+    from_account = ForeignKey(Account, related_name="private_messages_sent")
+    to_account = ForeignKey(Account, related_name="private_messages_received")
 
     def to_dict(self):
         """
@@ -161,11 +176,9 @@ class PrivateMessage(Message):
         """
         d = super(PrivateMessage, self).to_dict()
         d.update({
+            'fromAccount': self.from_account_id,
             'toAcount': self.to_acount_id,
         })
-
-    def __str__(self):
-        return self.text
 
     def __repr__(self):
         return "<PrivateMessage: %s>" % self.__str__()
