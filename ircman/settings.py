@@ -40,6 +40,7 @@ INSTALLED_APPS = (
 
     # 3rd party
     'django_extensions',
+    'tokenapi',
 
     # Custom apps
     'core',
@@ -111,3 +112,8 @@ AUTH_USER_MODEL = 'core.User'
 
 REDIS_HOST = "0.0.0.0"
 REDIS_PORT = 6379
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'tokenapi.backends.TokenBackend'
+)
