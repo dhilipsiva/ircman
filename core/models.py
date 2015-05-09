@@ -118,8 +118,8 @@ class UserServer(Model):
         """
         return {
             'id': str(self.id),
-            'userId': str(self.user_id),
-            'server': self.server.to_dict(),
+            'user': str(self.user_id),
+            'server': str(self.server_id),
             'label': self.label,
             'username': self.username,
             'password': self.password,
@@ -145,7 +145,7 @@ class Channel(Model):
         """
         return {
             'id': str(self.id),
-            'serverId': str(self.server_id),
+            'server': str(self.server_id),
             'name': self.name,
         }
 
@@ -171,9 +171,8 @@ class UserChannel(Model):
         """
         return {
             "id": str(self.id),
-            "userServerId": str(self.user_server_id),
-            "channelId": str(self.channel_id),
-            "channel": self.channel.to_dict(),
+            "userServer": str(self.user_server_id),
+            "channel": str(self.channel_id),
             "nickname": self.nickname,
             "password": self.password,
             "mode": self.mode,
@@ -224,8 +223,8 @@ class Message(BaseMessage):
         """
         d = super(Message, self).to_dict()
         d.update({
-            'channelId': str(self.channel_id),
-            'userChannelId': str(self.user_channel_id),
+            'channel': str(self.channel_id),
+            'userChannel': str(self.user_channel_id),
         })
         return d
 
@@ -241,6 +240,22 @@ class Conversation(Model):
     user_channel_1 = ForeignKey(UserChannel, related_name='+')
     user_channel_2 = ForeignKey(UserChannel, related_name='+')
 
+    def to_dict(self):
+        """
+        Dictify Conversation
+        """
+        return {
+            'id': str(self.id),
+            'userChannel1': str(self.user_channel_1_id),
+            'userChannel2': str(self.user_channel_2_id),
+        }
+
+    def __str__(self):
+        return "%s - %s" % (self.user_channel_1_id, self.user_channel_2_id)
+
+    def __repr__(self):
+        return "<Conversation: %s>" % self.__str__()
+
 
 class PrivateMessage(BaseMessage):
     conversation = ForeignKey(Conversation, related_name='private_messages')
@@ -253,8 +268,8 @@ class PrivateMessage(BaseMessage):
         """
         d = super(PrivateMessage, self).to_dict()
         d.update({
-            'fromAccount': str(self.from_account_id),
-            'toAcount': str(self.to_acount_id),
+            'conversation': str(self.conversation_id),
+            'userChannel': str(self.user_channel_id),
             'read': self.read,
         })
 

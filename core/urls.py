@@ -21,8 +21,9 @@ __status__ = "development"
 
 from django.conf.urls import url
 
-from core.views import init
+from core.views import init, channel
 
 urlpatterns = [
     url(r'^init$', init),
+    url(r'^channels/(?P<channel_id>.{36})$', channel),
 ]

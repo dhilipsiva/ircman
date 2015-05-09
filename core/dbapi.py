@@ -21,7 +21,7 @@ __status__ = "development"
 
 from django.db.models import Q
 
-from core.models import UserServer, UserChannel, Message, Conversation
+from core.models import UserServer, UserChannel, Message, Conversation, Channel
 
 
 def get_all_user_channels():
@@ -74,3 +74,13 @@ def get_conversations(user_channels):
     return Conversation.objects.filter(
         Q(user_channel_1__in=user_channels) |
         Q(user_channel_2__in=user_channels))
+
+
+def get_channel(channel_id):
+    """
+    Get a channel by ID
+    """
+    try:
+        return Channel.objects.get(id=channel_id)
+    except Channel.DoesNotExist:
+        return None
