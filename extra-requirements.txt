@@ -1,0 +1,1 @@
+https://github.com/dhilipsiva/django-tokenapi/archive/patch-1.zip

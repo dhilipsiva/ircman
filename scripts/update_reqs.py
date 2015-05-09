@@ -23,13 +23,14 @@ import subprocess
 
 dev_reqs = [req.lower() for req in [
     'pygraphviz',
-    'django-extensions'
+    'django-extensions',
 ]]
 
 test_reqs = [req.lower() for req in [
 ]]
 
 ignore_reqs = [req.lower() for req in [
+    "django-tokenapi",
 ]]
 
 dev_file = open('dev-requirements.txt', 'w')
