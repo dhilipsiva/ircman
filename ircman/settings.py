@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     # 3rd party
     'django_extensions',
     'tokenapi',
+    'corsheaders',
 
     # Custom apps
     'core',
@@ -48,6 +49,7 @@ INSTALLED_APPS = (
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -116,4 +118,8 @@ REDIS_PORT = 6379
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'tokenapi.backends.TokenBackend'
+)
+
+CORS_ORIGIN_WHITELIST = (
+    '0.0.0.0:4200',
 )
