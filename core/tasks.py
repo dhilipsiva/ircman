@@ -32,3 +32,18 @@ from core.dbapi import get_all_user_channels
 def init():
     for uc in get_all_user_channels():
         setup_client(uc.to_dict_deep())
+
+
+@shared_task
+def message(sender, channel_id, text, user_channel_id):
+    print sender, channel_id, text, user_channel_id
+
+
+@shared_task
+def pm(sender, text, user_channel_id):
+    print sender, text, user_channel_id
+
+
+@shared_task
+def error(message, user_channel_id):
+    print message, user_channel_id

@@ -41,9 +41,8 @@ class User(AbstractUser):
     """
     A custom user so that we can add permissions easily
     """
-    uuid = UUIDField(
-        default=uuid4, editable=False, primary_key=True)
-    socket_uuid = UUIDField(default=uuid4, editable=False)
+    id = UUIDField(primary_key=True, default=uuid4, editable=False)
+    socket = UUIDField(default=uuid4, editable=False)
 
     class Meta(AbstractUser.Meta):
         abstract = False
@@ -58,14 +57,14 @@ class User(AbstractUser):
         Dictify user
         """
         d = {
-            'id': str(self.uuid),
+            'id': str(self.id),
             'username': self.username,
             'firstName': self.first_name,
             'lastName': self.last_name,
         }
         if with_sensitive_data:
             d.update({
-                'socketUuid': str(self.socket_uuid),
+                'socket': str(self.socket),
                 'email': self.email,
             })
         return d
@@ -78,7 +77,7 @@ class User(AbstractUser):
 
 
 class Server(Model):
-    uuid = UUIDField(default=uuid4, editable=False, primary_key=True)
+    id = UUIDField(primary_key=True, default=uuid4, editable=False)
     host = CharField(max_length=256)
     port = PositiveIntegerField(default=6667, blank=True)
     is_ssl = BooleanField(default=False)
@@ -89,7 +88,7 @@ class Server(Model):
         Dictify user
         """
         return {
-            'id': str(self.uuid),
+            'id': str(self.id),
             'host': self.host,
             'port': self.port,
             'isSsl': self.is_ssl,
@@ -104,7 +103,7 @@ class Server(Model):
 
 
 class UserServer(Model):
-    uuid = UUIDField(default=uuid4, editable=False, primary_key=True)
+    id = UUIDField(primary_key=True, default=uuid4, editable=False)
     user = ForeignKey(User, related_name="user_servers")
     server = ForeignKey(Server, related_name="user_servers")
     label = CharField(max_length=256, default="My IRC Server")
@@ -118,8 +117,8 @@ class UserServer(Model):
         Dictify user
         """
         return {
-            'id': str(self.uuid),
-            'userId': self.user_uuid,
+            'id': str(self.id),
+            'userId': str(self.user_id),
             'server': self.server.to_dict(),
             'label': self.label,
             'username': self.username,
@@ -136,7 +135,7 @@ class UserServer(Model):
 
 
 class Channel(Model):
-    uuid = UUIDField(default=uuid4, editable=False, primary_key=True)
+    id = UUIDField(primary_key=True, default=uuid4, editable=False)
     server = ForeignKey(Server, related_name="channels")
     name = CharField(max_length=256)
 
@@ -145,8 +144,8 @@ class Channel(Model):
         Dictify user
         """
         return {
-            'id': str(self.uuid),
-            'serverId': self.server_id,
+            'id': str(self.id),
+            'serverId': str(self.server_id),
             'name': self.name,
         }
 
@@ -158,7 +157,7 @@ class Channel(Model):
 
 
 class UserChannel(Model):
-    uuid = UUIDField(default=uuid4, editable=False, primary_key=True)
+    id = UUIDField(primary_key=True, default=uuid4, editable=False)
     user_server = ForeignKey(UserServer, related_name="user_channels")
     channel = ForeignKey(Channel, related_name="user_channels")
     nickname = CharField(max_length=256)
@@ -170,9 +169,9 @@ class UserChannel(Model):
         Dictify user
         """
         return {
-            "id": str(self.uuid),
-            "userServerId": self.user_server_id,
-            "channelId": self.channel_id,
+            "id": str(self.id),
+            "userServerId": str(self.user_server_id),
+            "channelId": str(self.channel_id),
             "nickname": self.nickname,
             "password": self.password,
             "mode": self.mode,
@@ -195,7 +194,7 @@ class UserChannel(Model):
 
 
 class BaseMessage(Model):
-    uuid = UUIDField(default=uuid4, editable=False, primary_key=True)
+    id = UUIDField(primary_key=True, default=uuid4, editable=False)
     text = TextField()
     created_on = DateTimeField(auto_now_add=True)
 
@@ -204,7 +203,7 @@ class BaseMessage(Model):
         Dictify user
         """
         return {
-            'id': str(self.uuid),
+            'id': str(self.id),
             'text': self.text,
             'createdOn': self.created_on,
         }
@@ -232,7 +231,7 @@ class Message(BaseMessage):
 
 
 class Conversation(Model):
-    uuid = UUIDField(default=uuid4, editable=False, primary_key=True)
+    id = UUIDField(primary_key=True, default=uuid4, editable=False)
     user_channel_1 = ForeignKey(UserChannel, related_name='+')
     user_channel_2 = ForeignKey(UserChannel, related_name='+')
 
@@ -248,8 +247,8 @@ class PrivateMessage(BaseMessage):
         """
         d = super(PrivateMessage, self).to_dict()
         d.update({
-            'fromAccount': self.from_account_id,
-            'toAcount': self.to_acount_id,
+            'fromAccount': str(self.from_account_id),
+            'toAcount': str(self.to_acount_id),
             'read': self.read,
         })
 

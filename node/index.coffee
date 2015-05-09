@@ -44,13 +44,12 @@ setupClient = (userChannel)->
     @join userChannel.channel.name, (input) ->
       console.log 'Joined #ircman'
 
-  ircClient.addListener 'message', (from, to, text) ->
-    log @.userChannel
+  ircClient.addListener 'message', (sender, to, text) ->
     if shouldQueueMessage @
-      celeryClient.call 'core.tasks.message', [from, to, text, userChannel.id]
+      celeryClient.call 'core.tasks.message', [sender, userChannel.channel.id, text, userChannel.id]
 
-  ircClient.addListener 'pm', (from, text) ->
-    celeryClient.call 'core.tasks.pm', [from, text, userChannel.id]
+  ircClient.addListener 'pm', (sender, text) ->
+    celeryClient.call 'core.tasks.pm', [sender, text, userChannel.id]
 
   ircClient.addListener 'error', (message) ->
     celeryClient.call 'core.tasks.error', [message, userChannel.id]
