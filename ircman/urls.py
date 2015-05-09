@@ -19,4 +19,5 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^foosh/', include(admin.site.urls)),
     url(r'^api/', include('tokenapi.urls')),
+    url(r'^api/', include('core.urls')),
 ]

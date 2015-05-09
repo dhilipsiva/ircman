@@ -7,7 +7,7 @@
 #
 
 """
-File name: views.py
+File name: urls.py
 Version: 0.1
 Author: dhilipsiva <dhilipsiva@gmail.com>
 Date created: 2015-05-09
@@ -19,12 +19,10 @@ __status__ = "development"
 
 """
 
-from django.http import JsonResponse
-from tokenapi.decorators import token_required
+from django.conf.urls import url
 
+from core.views import init
 
-@token_required
-def init(request):
-    return JsonResponse({
-        'user': request.user.to_dict(with_sensitive_data=True),
-    })
+urlpatterns = [
+    url(r'^init$', init),
+]
