@@ -27,7 +27,7 @@ from uuid import uuid4
 from django.utils.timezone import utc
 from django.contrib.auth.models import AbstractUser
 from django.db.models import Model, ForeignKey, DateTimeField, UUIDField, \
-    CharField, TextField, PositiveIntegerField
+    CharField, TextField, PositiveIntegerField, BooleanField
 
 
 # App imports
@@ -169,6 +169,7 @@ class Message(BaseMessage):
 class PrivateMessage(BaseMessage):
     from_account = ForeignKey(Account, related_name="private_messages_sent")
     to_account = ForeignKey(Account, related_name="private_messages_received")
+    read = BooleanField(default=False)
 
     def to_dict(self):
         """
@@ -178,6 +179,7 @@ class PrivateMessage(BaseMessage):
         d.update({
             'fromAccount': self.from_account_id,
             'toAcount': self.to_acount_id,
+            'read': self.read,
         })
 
     def __repr__(self):
