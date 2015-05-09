@@ -13,7 +13,31 @@ var parseArgs = require('minimist')
   , redisPort = argv.port || 6379
   , redisHost = argv.host || 'localhost'
   , client = redis.createClient(parseInt(redisPort), redisHost)
-  , channels = {};
+  , channels = {}
+  , Sequelize = require('sequelize');
+
+
+// var sequelize = new Sequelize('postgres://user:pass@foo.com:5432/dbname');
+var sequelize = new Sequelize('', '', '', {
+  dialect: 'sqlite',
+  storage: '../db.sqlite3'
+})
+
+console.log(sequelize);
+
+var User = sequelize.define('core_user', {
+  username: {
+    type: Sequelize.STRING,
+    field: 'username'
+  }
+}, {
+  freezeTableName: true,
+  timestamps: false
+});
+
+User.findAll().then(function(users) {
+  console.log(users);
+})
 
 var getChannelsItem = function(client, channel) {
   var channelID = client.opt.server + ":" + client.opt.nick;
