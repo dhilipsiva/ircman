@@ -7,7 +7,8 @@
 
 Sequelize = require 'sequelize'
 parseArgs = require 'minimist'
-io = require('socket.io') port
+celery = require 'node-celery'
+socketIO = require 'socket.io'
 redis = require 'redis'
 irc = require 'irc'
 
@@ -15,12 +16,46 @@ port = 8008
 argv = parseArgs process.argv
 redisPort = argv.port or 6379
 redisHost = argv.host or 'localhost'
-client = redis.createClient parseInt(redisPort), redisHost
+io = socketIO port
+redisClient = redis.createClient parseInt(redisPort), redisHost
 channels = {}
+
+
+getChannelsItem = (client, channel) ->
+  channelID = "#{client.opt.server}:#{client.opt.nick}"
+  console.log channelID
+
+setupClient = (userChannel)->
+
+  ircClient = new irc.Client userChannel.userServer.server.host,
+    userChannel.userServer.nickname,
+    autoConnect: false
+    password: userChannel.userServer.password
+    port: userChannel.userServer.port
+
+  ircClient.userChannel = userChannel
+
+  ircClient.connect 5, (input) ->
+    console.log 'Connected!'
+    @join userChannel.channel.name, (input) ->
+      console.log 'Joined #ircman'
+
+  ircClient.addListener 'message', (from, to, text) ->
+    console.log @userChannel
+    console.log 'm: ' + from + ' => ' + to + ': ' + text
+    @say userChannel.channel.name, 'Echo: ' + text
+    console.log @opt.server
+
+  ircClient.addListener 'pm', (from, text) ->
+    console.log 'pm: ' + from + ' => ' + text
+
+  ircClient.addListener 'error', (message) ->
+    console.log 'error: ', message
 
 console.log 'server listens on port ' + port
 
 io.sockets.on 'connection', (socket) ->
+
   socket.on 'subscribe', (data) ->
     socket.join data.room
     console.log 'User joined the room: ', data
@@ -33,7 +68,8 @@ io.sockets.on 'connection', (socket) ->
     socket.leave data.room
     console.log 'User quit the room: ', data
 
-client.on 'message', (channel, message) ->
+redisClient.on 'message', (channel, message) ->
+
   console.log 'channel:%s - message:%s', channel, message
   data = JSON.parse message
 
@@ -45,9 +81,14 @@ client.on 'message', (channel, message) ->
     when 'tasks'
       console.log 'SOME TASKS SENT'
 
-client.subscribe 'notify'
+    when 'setupClient'
+      setupClient data.data
 
-client.subscribe 'tasks'
+redisClient.subscribe 'notify'
+
+redisClient.subscribe 'tasks'
+
+redisClient.subscribe 'setupClient'
 
 ###
 # Usage on client side
@@ -56,74 +97,11 @@ client.subscribe 'tasks'
 #
 ###
 
-# var sequelize = new Sequelize('postgres://user:pass@foo.com:5432/dbname');
+celeryClient = celery.createClient
+  CELERY_BROKER_URL: 'amqp://guest:guest@localhost:5672//'
 
-sequelize = new Sequelize '', '', '',
-  dialect: 'sqlite'
-  storage: '../db.sqlite3'
-  define:
-    timestamps: false
-    freezeTableName: true
+celeryClient.on 'error', (err) ->
+    console.log err
 
-User = sequelize.define 'core_user',
-  id:
-    type: Sequelize.BIGINT
-    primaryKey: true
-  username: Sequelize.STRING
-
-Server = sequelize.define 'core_server',
-  id:
-    type: Sequelize.BIGINT
-    primaryKey: true
-  host: Sequelize.STRING
-  port: Sequelize.BIGINT
-  isSsl:
-    type: Sequelize.BOOLEAN
-    field: 'is_ssl'
-  isSasl:
-    type: Sequelize.BOOLEAN
-    field: 'is_sasl'
-
-UserServer = sequelize.define 'core_userserver',
-  id:
-    type: Sequelize.BIGINT
-    primaryKey: true
-  label: Sequelize.STRING
-  username: Sequelize.STRING
-  password: Sequelize.STRING
-  nickname: Sequelize.STRING
-  realname: Sequelize.STRING
-
-UserServer.belongsTo Server,
-  foreignKey: 'server_id'
-
-Server.hasMany UserServer,
-  foreignKey: 'server_id'
-  # through: 'UserServers'
-
-UserServer.findAll().then (objects) ->
-  for object in objects
-    console.log Object.keys object
-    console.log object.server_id
-
-getChannelsItem = (client, channel) ->
-  channelID = client.opt.server + ':' + client.opt.nick
-
-ircClient = new irc.Client '0.0.0.0', 'foopygoo2', autoConnect: false
-
-ircClient.connect 5, (input) ->
-  console.log 'Connected!'
-  @join '#ircman', (input) ->
-    console.log 'Joined #ircman'
-
-ircClient.addListener 'message', (from, to, text) ->
-  console.log 'm: ' + from + ' => ' + to + ': ' + text
-  @say '#ircman', 'Echo: ' + text
-  console.log @opt.server
-
-ircClient.addListener 'pm', (from, text) ->
-  console.log 'pm: ' + from + ' => ' + text
-  ircClient.say '#ircman', 'Echo: ' + text
-
-ircClient.addListener 'error', (message) ->
-  console.log 'error: ', message
+celeryClient.on 'connect', ->
+    celeryClient.call 'core.tasks.init'

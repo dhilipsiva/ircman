@@ -30,10 +30,6 @@ from django.db.models import Model, ForeignKey, DateTimeField, UUIDField, \
     CharField, TextField, PositiveIntegerField, BooleanField
 
 
-# App imports
-from core.utils import random_uuid
-
-
 def utc_now():
     """
     `now` with UTC
@@ -45,15 +41,13 @@ class User(AbstractUser):
     """
     A custom user so that we can add permissions easily
     """
-    uuid = UUIDField(default=uuid4, editable=False)
+    uuid = UUIDField(default=uuid4, editable=False, db_index=True)
     socket_uuid = UUIDField(default=uuid4, editable=False)
 
     class Meta(AbstractUser.Meta):
         abstract = False
 
     def save(self, *args, **kwargs):
-        if not self.uuid:
-            self.uuid = random_uuid()
         if 'pbkdf2_sha256' not in self.password:
             self.set_password(self.password)
         super(User, self).save(*args, **kwargs)
@@ -83,6 +77,7 @@ class User(AbstractUser):
 
 
 class Server(Model):
+    uuid = UUIDField(default=uuid4, editable=False, db_index=True)
     host = CharField(max_length=256)
     port = PositiveIntegerField(default=6667, blank=True)
     is_ssl = BooleanField(default=False)
@@ -95,6 +90,9 @@ class Server(Model):
         return {
             'id': str(self.uuid),
             'host': self.host,
+            'port': self.port,
+            'isSsl': self.is_ssl,
+            'isSasl': self.is_sasl,
         }
 
     def __str__(self):
@@ -114,8 +112,30 @@ class UserServer(Model):
     nickname = CharField(max_length=256)
     realname = CharField(max_length=256, null=True, blank=True)
 
+    def to_dict(self):
+        """
+        Dictify user
+        """
+        return {
+            'id': str(self.uuid),
+            'userId': self.user_id,
+            'server': self.server.to_dict(),
+            'label': self.label,
+            'username': self.username,
+            'password': self.password,
+            'nickname': self.nickname,
+            'realname': self.realname,
+        }
+
+    def __str__(self):
+        return "%s - %s" % (self.user, self.server)
+
+    def __repr__(self):
+        return "<UserServer: %s>" % self.__str__()
+
 
 class Channel(Model):
+    uuid = UUIDField(default=uuid4, editable=False, db_index=True)
     server = ForeignKey(Server, related_name="channels")
     name = CharField(max_length=256)
 
@@ -124,7 +144,9 @@ class Channel(Model):
         Dictify user
         """
         return {
-            'port': self.port,
+            'id': str(self.uuid),
+            'serverId': self.server_id,
+            'name': self.name,
         }
 
     def __str__(self):
@@ -141,6 +163,34 @@ class UserChannel(Model):
     password = CharField(max_length=256, null=True, blank=True)
     uuid = UUIDField(default=uuid4, editable=False, db_index=True)
     mode = CharField(max_length=16, null=True, blank=True)
+
+    def to_dict(self):
+        """
+        Dictify user
+        """
+        return {
+            "id": str(self.uuid),
+            "userServerId": self.user_server_id,
+            "channelId": self.channel_id,
+            "nickname": self.nickname,
+            "password": self.password,
+            "mode": self.mode,
+        }
+
+    def to_dict_deep(self):
+        """
+        Deep `to_dict`
+        """
+        d = self.to_dict()
+        d['userServer'] = self.user_server.to_dict()
+        d['channel'] = self.channel.to_dict()
+        return d
+
+    def __str__(self):
+        return "%s - %s" % (self.channel, self.nickname)
+
+    def __repr__(self):
+        return "<UserChannel: %s>" % self.__str__()
 
 
 class BaseMessage(Model):
@@ -181,7 +231,7 @@ class Message(BaseMessage):
 
 
 class Conversation(Model):
-    uuid = UUIDField(default=uuid4, editable=False)
+    uuid = UUIDField(default=uuid4, editable=False, db_index=True)
     user_channel_1 = ForeignKey(UserChannel, related_name='+')
     user_channel_2 = ForeignKey(UserChannel, related_name='+')
 

@@ -108,3 +108,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 AUTH_USER_MODEL = 'core.User'
+
+REDIS_HOST = "0.0.0.0"
+REDIS_PORT = 6379
