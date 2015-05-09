@@ -38,6 +38,16 @@ def init(request):
         'user_channels': [uc.to_dict() for uc in user_channels],
         'channels': [uc.channel.to_dict() for uc in user_channels],
         'conversations': [c.to_dict() for c in conversations],
+        'messages': [
+            m.to_dict()
+            for uc in user_channels
+            for m in uc.channel.messages.all()
+        ],
+        'private_messages': [
+            pm.to_dict()
+            for conv in conversations
+            for pm in conv.private_messages.all()
+        ],
     })
 
 
