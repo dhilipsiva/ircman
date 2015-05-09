@@ -1,0 +1,2 @@
+django-extensions==1.5.3
+pygraphviz==1.2
