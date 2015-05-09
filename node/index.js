@@ -18,25 +18,27 @@ var parseArgs = require('minimist')
 
 
 // var sequelize = new Sequelize('postgres://user:pass@foo.com:5432/dbname');
+
 var sequelize = new Sequelize('', '', '', {
   dialect: 'sqlite',
-  storage: '../db.sqlite3'
+  storage: '../db.sqlite3',
+  define: {
+    timestamps: false,
+    freezeTableName: true
+  }
 })
-
-console.log(sequelize);
 
 var User = sequelize.define('core_user', {
   username: {
     type: Sequelize.STRING,
     field: 'username'
   }
-}, {
-  freezeTableName: true,
-  timestamps: false
 });
 
 User.findAll().then(function(users) {
-  console.log(users);
+  for (i = 0; i < users.length; i++) {
+    console.log(users[i].username);
+  }
 })
 
 var getChannelsItem = function(client, channel) {

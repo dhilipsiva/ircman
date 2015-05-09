@@ -83,8 +83,10 @@ class User(AbstractUser):
 
 
 class Server(Model):
-    hostname = CharField(max_length=256)
-    uuid = UUIDField(default=uuid4, editable=False)
+    host = CharField(max_length=256)
+    port = PositiveIntegerField(default=6667, blank=True)
+    is_ssl = BooleanField(default=False)
+    is_sasl = BooleanField(default=False)
 
     def to_dict(self):
         """
@@ -96,20 +98,26 @@ class Server(Model):
         }
 
     def __str__(self):
-        return self.hostname
+        return self.host
 
     def __repr__(self):
         return "<Server: %s>" % self.__str__()
 
 
-class Account(Model):
-    server = ForeignKey(Server, related_name="accounts")
-    user = ForeignKey(User, related_name="accounts")
-    nickname = CharField(max_length=256)
+class UserServer(Model):
+    uuid = UUIDField(default=uuid4, editable=False, db_index=True)
+    user = ForeignKey(User, related_name="user_servers")
+    server = ForeignKey(Server, related_name="user_servers")
+    label = CharField(max_length=256, default="My IRC Server")
     username = CharField(max_length=256)
     password = CharField(max_length=256)
-    port = PositiveIntegerField(default=6667, blank=True)
-    uuid = UUIDField(default=uuid4, editable=False)
+    nickname = CharField(max_length=256)
+    realname = CharField(max_length=256)
+
+
+class Channel(Model):
+    server = ForeignKey(Server, related_name="channels")
+    name = CharField(max_length=256)
 
     def to_dict(self):
         """
@@ -127,6 +135,15 @@ class Account(Model):
 
     def __repr__(self):
         return "<Account: %s>" % self.__str__()
+
+
+class UserChannel(Model):
+    user_server = ForeignKey(UserServer, related_name="user_channels")
+    channel = ForeignKey(Channel, related_name="user_channels")
+    nickname = CharField(max_length=256)
+    password = CharField(max_length=256)
+    uuid = UUIDField(default=uuid4, editable=False, db_index=True)
+    mode = CharField(max_length=16, default="")
 
 
 class BaseMessage(Model):
@@ -149,8 +166,8 @@ class BaseMessage(Model):
 
 
 class Message(BaseMessage):
-    from_account = ForeignKey(Account, related_name="messages_sent")
-    to_server = ForeignKey(Server, related_name="messages_received")
+    channel = ForeignKey(Channel, related_name="messages")
+    user_channel = ForeignKey(UserChannel, related_name="messages")
 
     def to_dict(self):
         """
@@ -166,9 +183,15 @@ class Message(BaseMessage):
         return "<Message: %s>" % self.__str__()
 
 
+class Conversation(Model):
+    uuid = UUIDField(default=uuid4, editable=False)
+    user_channel_1 = ForeignKey(UserChannel, related_name='+')
+    user_channel_2 = ForeignKey(UserChannel, related_name='+')
+
+
 class PrivateMessage(BaseMessage):
-    from_account = ForeignKey(Account, related_name="private_messages_sent")
-    to_account = ForeignKey(Account, related_name="private_messages_received")
+    conversation = ForeignKey(Conversation, related_name='private_messages')
+    user_channel = ForeignKey(UserChannel, related_name='private_messages')
     read = BooleanField(default=False)
 
     def to_dict(self):
