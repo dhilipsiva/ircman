@@ -173,6 +173,7 @@ class UserChannel(Model):
             "id": str(self.id),
             "userServerId": str(self.user_server_id),
             "channelId": str(self.channel_id),
+            "channel": self.channel.to_dict(),
             "nickname": self.nickname,
             "password": self.password,
             "mode": self.mode,

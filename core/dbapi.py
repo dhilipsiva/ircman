@@ -19,7 +19,9 @@ __status__ = "development"
 
 """
 
-from core.models import UserChannel, Message
+from django.db.models import Q
+
+from core.models import UserServer, UserChannel, Message, Conversation
 
 
 def get_all_user_channels():
@@ -49,3 +51,26 @@ def get_users_for_channel_id(channel_id):
     """
     ucs = UserChannel.objects.filter(channel_id=channel_id)
     return [uc.user_server.user for uc in ucs if uc.user_server]
+
+
+def get_user_servers(user):
+    """
+    docstring for get_user_servers
+    """
+    return UserServer.objects.filter(user=user)
+
+
+def get_user_channels(user_servers):
+    """
+    docstring for get_user_channels
+    """
+    return UserChannel.objects.filter(user_server__in=user_servers)
+
+
+def get_conversations(user_channels):
+    """
+    docstring for get_conversations
+    """
+    return Conversation.objects.filter(
+        Q(user_channel_1__in=user_channels) |
+        Q(user_channel_2__in=user_channels))
