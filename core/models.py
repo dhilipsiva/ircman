@@ -41,7 +41,8 @@ class User(AbstractUser):
     """
     A custom user so that we can add permissions easily
     """
-    uuid = UUIDField(default=uuid4, editable=False, db_index=True)
+    uuid = UUIDField(
+        default=uuid4, editable=False, primary_key=True)
     socket_uuid = UUIDField(default=uuid4, editable=False)
 
     class Meta(AbstractUser.Meta):
@@ -77,7 +78,7 @@ class User(AbstractUser):
 
 
 class Server(Model):
-    uuid = UUIDField(default=uuid4, editable=False, db_index=True)
+    uuid = UUIDField(default=uuid4, editable=False, primary_key=True)
     host = CharField(max_length=256)
     port = PositiveIntegerField(default=6667, blank=True)
     is_ssl = BooleanField(default=False)
@@ -103,7 +104,7 @@ class Server(Model):
 
 
 class UserServer(Model):
-    uuid = UUIDField(default=uuid4, editable=False, db_index=True)
+    uuid = UUIDField(default=uuid4, editable=False, primary_key=True)
     user = ForeignKey(User, related_name="user_servers")
     server = ForeignKey(Server, related_name="user_servers")
     label = CharField(max_length=256, default="My IRC Server")
@@ -118,7 +119,7 @@ class UserServer(Model):
         """
         return {
             'id': str(self.uuid),
-            'userId': self.user_id,
+            'userId': self.user_uuid,
             'server': self.server.to_dict(),
             'label': self.label,
             'username': self.username,
@@ -135,7 +136,7 @@ class UserServer(Model):
 
 
 class Channel(Model):
-    uuid = UUIDField(default=uuid4, editable=False, db_index=True)
+    uuid = UUIDField(default=uuid4, editable=False, primary_key=True)
     server = ForeignKey(Server, related_name="channels")
     name = CharField(max_length=256)
 
@@ -157,11 +158,11 @@ class Channel(Model):
 
 
 class UserChannel(Model):
+    uuid = UUIDField(default=uuid4, editable=False, primary_key=True)
     user_server = ForeignKey(UserServer, related_name="user_channels")
     channel = ForeignKey(Channel, related_name="user_channels")
     nickname = CharField(max_length=256)
     password = CharField(max_length=256, null=True, blank=True)
-    uuid = UUIDField(default=uuid4, editable=False, db_index=True)
     mode = CharField(max_length=16, null=True, blank=True)
 
     def to_dict(self):
@@ -194,8 +195,8 @@ class UserChannel(Model):
 
 
 class BaseMessage(Model):
+    uuid = UUIDField(default=uuid4, editable=False, primary_key=True)
     text = TextField()
-    uuid = UUIDField(default=uuid4, editable=False)
     created_on = DateTimeField(auto_now_add=True)
 
     def to_dict(self):
@@ -231,7 +232,7 @@ class Message(BaseMessage):
 
 
 class Conversation(Model):
-    uuid = UUIDField(default=uuid4, editable=False, db_index=True)
+    uuid = UUIDField(default=uuid4, editable=False, primary_key=True)
     user_channel_1 = ForeignKey(UserChannel, related_name='+')
     user_channel_2 = ForeignKey(UserChannel, related_name='+')
 

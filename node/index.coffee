@@ -20,10 +20,14 @@ io = socketIO port
 redisClient = redis.createClient parseInt(redisPort), redisHost
 channels = {}
 
-
-getChannelsItem = (client, channel) ->
-  channelID = "#{client.opt.server}:#{client.opt.nick}"
-  console.log channelID
+shouldQueueMessage = (ircClient)->
+  c_id = channels[ircClient.userChannel.channel.id]
+  if !c_id
+    channels[ircClient.userChannel.channel.id] = ircClient.id
+    return true
+  if c_id is ircClient.id
+    return true
+  return false
 
 setupClient = (userChannel)->
 
@@ -41,16 +45,15 @@ setupClient = (userChannel)->
       console.log 'Joined #ircman'
 
   ircClient.addListener 'message', (from, to, text) ->
-    console.log @userChannel
-    console.log 'm: ' + from + ' => ' + to + ': ' + text
-    @say userChannel.channel.name, 'Echo: ' + text
-    console.log @opt.server
+    log @.userChannel
+    if shouldQueueMessage @
+      celeryClient.call 'core.tasks.message', [from, to, text, userChannel.id]
 
   ircClient.addListener 'pm', (from, text) ->
-    console.log 'pm: ' + from + ' => ' + text
+    celeryClient.call 'core.tasks.pm', [from, text, userChannel.id]
 
   ircClient.addListener 'error', (message) ->
-    console.log 'error: ', message
+    celeryClient.call 'core.tasks.error', [message, userChannel.id]
 
 console.log 'server listens on port ' + port
 
