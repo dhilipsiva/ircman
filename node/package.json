@@ -1,0 +1,30 @@
+{
+  "name": "ircman",
+  "version": "0.1.0",
+  "description": "IRC Manager",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:dhilipsiva/ircman"
+  },
+  "keywords": [
+    "IRC",
+    "Manager"
+  ],
+  "author": "dhilipsiva",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dhilipsiva/ircman/issues"
+  },
+  "homepage": "https://github.com/dhilipsiva/ircman",
+  "dependencies": {
+    "irc": "^0.3.12",
+    "minimist": "^1.1.1",
+    "redis": "^0.12.1",
+    "socket.io": "^1.3.5"
+  }
+}
