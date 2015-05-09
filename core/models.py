@@ -104,6 +104,7 @@ class Server(Model):
 
 class Account(Model):
     server = ForeignKey(Server)
+    user = ForeignKey(User)
     nickname = CharField(max_length=256)
     username = CharField(max_length=256)
     password = CharField(max_length=256)
