@@ -150,3 +150,6 @@ AUTHENTICATION_BACKENDS = (
 CORS_ORIGIN_WHITELIST = (
     '0.0.0.0:4200',
 )
+
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
