@@ -83,8 +83,5 @@ def create_pm_4_web(user, conversation_id, text):
         to = pm.conversation.user_channel_1
     say_pm(str(sender.id), to.nickname, text)
     users = get_users_for_pm(pm)
-    print "==================================================="
-    print users
-    print "==================================================="
     rooms = [str(u.socket) for u in users]
     return notify_pm_new(rooms, pm.to_dict())
