@@ -16,7 +16,7 @@ export PYTHONPATH=`pwd`
 source %(virtenv)s/bin/activate
 # start gunicorn with all options earlier declared in fabfile.py
 
-exec gunicorn \
+gunicorn \
     -w %(gunicorn_workers)s \
     --user=%(deploy_user)s \
     --bind=%(gunicorn_bind)s \
