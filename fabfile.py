@@ -808,11 +808,7 @@ def git_is_dirty(ignore_untracked_files):
 @roles('web', 'task')
 def upload_key_files():
     [put('%s/%s' % (env.conf_folder, f), env.code_root) for f in [
-        "client_secrets.json",
-        "google.der",
         "local_settings.py",
-        "oauth2.dat",
-        "frontend.pem",
     ]]
 
 
@@ -893,16 +889,16 @@ def setup():
     """
     puts(green_bg('Start setup...'))
     start_time = datetime.now()
-    ensure_deps()
+    # ensure_deps()
     # execute(ensure_dirs)
     # execute(update_redis_conf)
     # execute(git_seed)
     # execute(git_reset)
     # execute(ensure_venv)
     # execute(ensure_nodeenv)
-    execute(ensure_npm_deps)
-    execute(update_venv, True)
-    execute(upload_key_files)
+    # execute(ensure_npm_deps)
+    # execute(update_venv, True)
+    # execute(upload_key_files)
     execute(upload_index_file)
     execute(migrate)
     execute(collect_static)
