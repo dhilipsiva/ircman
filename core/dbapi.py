@@ -21,7 +21,8 @@ __status__ = "development"
 
 from django.db.models import Q
 
-from core.models import UserServer, UserChannel, Message, Conversation, Channel
+from core.models import UserServer, UserChannel, Message, Conversation, \
+    Channel, PrivateMessage
 
 
 def get_all_user_channels():
@@ -40,6 +41,17 @@ def create_message(sender, channel_id, text, user_channel_id):
     except UserChannel.DoesNotExist:
         uc = UserChannel(channel_id=channel_id, nickname=sender)
         uc.save()
+    message = Message(channel_id=channel_id, user_channel=uc, text=text)
+    message.save()
+    return message
+
+
+def create_message_for_user(user, channel_id, text):
+    """
+    Create a new message
+    """
+    uc = UserChannel.objects.get(
+        channel_id=channel_id, user_server__user=user)
     message = Message(channel_id=channel_id, user_channel=uc, text=text)
     message.save()
     return message
@@ -93,4 +105,70 @@ def get_conversation(conversation_id):
     try:
         return Conversation.objects.get(id=conversation_id)
     except Conversation.DoesNotExist:
+        return None
+
+
+def create_pm(sender, text, user_channel_id):
+    """
+    Create a new message
+    """
+    try:
+        lc = UserChannel.objects.get(id=user_channel_id)
+        uc = UserChannel.objects.get(channel_id=lc.channel_id, nickname=sender)
+    except UserChannel.DoesNotExist:
+        uc = UserChannel(channel_id=lc.channel_id, nickname=sender)
+        uc.save()
+    try:
+        conv = Conversation.objects.get(
+            Q(user_channel_1__in=[lc, uc]) &
+            Q(user_channel_2__in=[lc, uc]))
+    except Exception:
+        conv = Conversation(user_channel_1=lc, user_channel_2=uc)
+        conv.save()
+    pm = PrivateMessage(conversation=conv, user_channel=uc, text=text)
+    pm.save()
+    return pm
+
+
+def get_users_for_pm(pm):
+    """
+    docstring for get_users_for_pm
+    """
+    r = []
+    try:
+        r.append(pm.conversation.user_channel_1.user_server.user)
+    except AttributeError:
+        pass
+    try:
+        r.append(pm.conversation.user_channel_2.user_server.user)
+    except AttributeError:
+        pass
+    return r
+
+
+def create_pm_for_user(conversation_id, text, user):
+    """
+    docstring for create_pm_for_user
+    """
+    # conv = Conversation.objects.get()
+    pass
+
+
+def get_user_channel(user_channel_id):
+    """
+    docstring for get_user_channel
+    """
+    try:
+        return UserChannel.objects.get(id=user_channel_id)
+    except UserChannel.DoesNotExist:
+        return None
+
+
+def get_user_server(user_server_id):
+    """
+    docstring for get_user_channel
+    """
+    try:
+        return UserServer.objects.get(id=user_server_id)
+    except UserServer.DoesNotExist:
         return None

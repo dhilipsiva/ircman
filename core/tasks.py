@@ -23,10 +23,11 @@ __status__ = "development"
 
 from celery import shared_task
 
-from node.notify import setup_client, notify_message_new
+from node.notify import setup_client, notify_message_new, say
 
 from core.dbapi import get_all_user_channels, create_message, \
-    get_users_for_channel_id
+    get_users_for_channel_id, create_message_for_user, create_pm, \
+    get_users_for_pm
 
 
 @shared_task
@@ -46,9 +47,29 @@ def message(sender, channel_id, text, user_channel_id):
 
 @shared_task
 def pm(sender, text, user_channel_id):
-    print sender, text, user_channel_id
+    pm = create_pm(sender, text, user_channel_id)
+    users = get_users_for_pm(pm)
+    rooms = list(set([str(u.socket) for u in users]))
+    return notify_message_new(rooms, pm.to_dict())
 
 
 @shared_task
 def error(message, user_channel_id):
     print message, user_channel_id
+
+
+@shared_task
+def create_message_4_web(user, channel_id, text):
+    """
+    """
+    message = create_message_for_user(user, channel_id, text)
+    say(str(message.user_channel.id), text)
+    users = get_users_for_channel_id(channel_id)
+    rooms = list(set([str(u.socket) for u in users]))
+    return notify_message_new(rooms, message.to_dict())
+
+
+@shared_task
+def create_pm_4_web(user, conversation_id, text):
+    """
+    """

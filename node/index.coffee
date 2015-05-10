@@ -19,6 +19,7 @@ redisHost = argv.host or 'localhost'
 io = socketIO port
 redisClient = redis.createClient parseInt(redisPort), redisHost
 channels = {}
+clients = {}
 
 shouldQueueMessage = (ircClient)->
   c_id = channels[ircClient.userChannel.channel.id]
@@ -29,6 +30,9 @@ shouldQueueMessage = (ircClient)->
     return true
   return false
 
+trackClient = (ircClient) ->
+  clients[ircClient.userChannel.id] = ircClient
+
 setupClient = (userChannel)->
 
   ircClient = new irc.Client userChannel.userServer.server.host,
@@ -38,6 +42,8 @@ setupClient = (userChannel)->
     port: userChannel.userServer.port
 
   ircClient.userChannel = userChannel
+
+  trackClient ircClient
 
   ircClient.connect 5, (input) ->
     console.log 'Connected!'
@@ -70,6 +76,7 @@ io.sockets.on 'connection', (socket) ->
     socket.leave data.room
     console.log 'User quit the room: ', data
 
+
 redisClient.on 'message', (channel, message) ->
 
   console.log 'channel:%s - message:%s', channel, message
@@ -83,6 +90,10 @@ redisClient.on 'message', (channel, message) ->
     when 'tasks'
       console.log 'SOME TASKS SENT'
 
+    when 'say'
+      c = clients[data.event]
+      c.say c.userChannel.channel.name, data.data
+
     when 'setupClient'
       setupClient data.data
 
@@ -91,6 +102,8 @@ redisClient.subscribe 'notify'
 redisClient.subscribe 'tasks'
 
 redisClient.subscribe 'setupClient'
+
+redisClient.subscribe 'say'
 
 ###
 # Usage on client side

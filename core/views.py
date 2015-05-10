@@ -19,11 +19,12 @@ __status__ = "development"
 
 """
 
+from celery import current_app
 from django.http import JsonResponse, Http404
 from tokenapi.decorators import token_required
 
-from core.dbapi import get_user_servers, get_user_channels, \
-    get_conversations, get_channel, get_conversation
+from core.dbapi import get_user_servers, get_user_channels, get_channel, \
+    get_conversations, get_conversation, get_user_channel, get_user_server
 
 
 @token_required
@@ -75,3 +76,48 @@ def conversation(request, conversation_id):
     return JsonResponse({
         'conversation': conversation.to_dict(),
     })
+
+
+@token_required
+def user_channel(request, user_channel_id):
+    """
+    Get channel data
+    """
+    user_channel = get_user_channel(user_channel_id)
+    if not user_channel:
+        raise Http404
+    return JsonResponse({
+        'userChannel': user_channel.to_dict(),
+    })
+
+
+@token_required
+def user_server(request, user_server_id):
+    """
+    Get channel data
+    """
+    user_server = get_user_server(user_server_id)
+    if not user_channel:
+        raise Http404
+    return JsonResponse({
+        'userServer': user_server.to_dict(),
+    })
+
+
+@token_required
+def message(request):
+    """
+    Create a new message
+    """
+    text = request.POST.get("text")
+    modelType = request.POST.get("modelType")
+    uuid = request.POST.get("modelId")
+    if modelType == 'channel':
+        current_app.send_task(
+            "core.tasks.create_message_4_web",
+            args=[request.user, uuid, text])
+    else:
+        current_app.send_task(
+            "core.tasks.create_pm_4_web",
+            args=[request.user, uuid, text])
+    return JsonResponse({})

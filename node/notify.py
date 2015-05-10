@@ -49,6 +49,13 @@ def notify(rooms, event, data):
     return _redis_call('notify', data, rooms, event)
 
 
+def say(channel_id, data):
+    """
+    docstring for say"
+    """
+    _redis_call('say', data, [], channel_id)
+
+
 def notify_message_new(rooms, data):
     """
     docstring for notify_message

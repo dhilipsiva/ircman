@@ -21,10 +21,14 @@ __status__ = "development"
 
 from django.conf.urls import url
 
-from core.views import init, channel, conversation
+from core.views import init, channel, conversation, message, user_channel, \
+    user_server
 
 urlpatterns = [
     url(r'^init$', init),
     url(r'^channels/(?P<channel_id>.{36})$', channel),
     url(r'^conversations/(?P<conversation_id>.{36})$', conversation),
+    url(r'^userChannels/(?P<user_channel_id>.{36})$', user_channel),
+    url(r'^userServers/(?P<user_server_id>.{36})$', user_server),
+    url(r'^message$', message),
 ]
