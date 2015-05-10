@@ -119,7 +119,7 @@ redisClient.subscribe 'say_pm'
 ###
 
 celeryClient = celery.createClient
-  CELERY_BROKER_URL: 'amqp://guest:guest@localhost:5672//'
+  CELERY_BROKER_URL: "amqp://guest:guest@#{redisHost}:5672//"
 
 celeryClient.on 'error', (err) ->
     console.log err
