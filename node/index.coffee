@@ -94,6 +94,10 @@ redisClient.on 'message', (channel, message) ->
       c = clients[data.event]
       c.say c.userChannel.channel.name, data.data
 
+    when 'say_pm'
+      c = clients[data.event]
+      c.say data.rooms, data.data
+
     when 'setupClient'
       setupClient data.data
 
@@ -104,6 +108,8 @@ redisClient.subscribe 'tasks'
 redisClient.subscribe 'setupClient'
 
 redisClient.subscribe 'say'
+
+redisClient.subscribe 'say_pm'
 
 ###
 # Usage on client side

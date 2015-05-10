@@ -56,6 +56,13 @@ def say(channel_id, data):
     _redis_call('say', data, [], channel_id)
 
 
+def say_pm(channel_id_sender, channel_id_recv, data):
+    """
+    docstring for say"
+    """
+    _redis_call('say_pm', data, channel_id_recv, channel_id_sender)
+
+
 def notify_message_new(rooms, data):
     """
     docstring for notify_message

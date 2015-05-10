@@ -150,8 +150,24 @@ def create_pm_for_user(conversation_id, text, user):
     """
     docstring for create_pm_for_user
     """
-    # conv = Conversation.objects.get()
-    pass
+    conv = Conversation.objects.get(id=conversation_id)
+    try:
+        if conv.user_channel_1.user_server.user == user:
+            uc = conv.user_channel_1
+        else:
+            uc = conv.user_channel_2
+    except AttributeError:
+        pass
+    try:
+        if conv.user_channel_2.user_server.user == user:
+            uc = conv.user_channel_2
+        else:
+            uc = conv.user_channel_1
+    except AttributeError:
+        pass
+    pm = PrivateMessage(conversation=conv, user_channel=uc, text=text)
+    pm.save()
+    return pm
 
 
 def get_user_channel(user_channel_id):
