@@ -52,14 +52,17 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # 3rd party
-    'django_extensions',
     'tokenapi',
     'corsheaders',
 
     # Custom apps
     'core',
 )
+
+if DEBUG:
+    INSTALLED_APPS += (
+        'django_extensions',
+    )
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
