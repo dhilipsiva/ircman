@@ -555,7 +555,6 @@ def migrate():
     with virtualenv(env.virtenv):
         with cd(env.code_root):
             run("./manage.py migrate")
-            run("./manage.py update_webapp_data")
 
 
 @task
@@ -869,7 +868,7 @@ def setup():
     # execute(update_venv, True)
     # execute(upload_key_files)
     # execute(upload_index_file)
-    execute(migrate)
+    # execute(migrate)
     execute(collect_static)
     execute(upload_rungunicorn_script)
     execute(upload_celery_script)
