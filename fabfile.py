@@ -44,7 +44,6 @@ from fabtools.vagrant import vagrant
 from fabtools.python import virtualenv, install_requirements
 from fabtools.files import is_file
 from fabtools.utils import abspath
-from fabtools.cron import add_task
 
 paramiko.util.log_to_file('paramiko.log')
 
@@ -490,22 +489,6 @@ def upload_rungunicorn_script():
 
 
 @task
-@roles('support')
-def upload_cron_script():
-    cron_name = 'snapshot'
-    if isfile('scripts/cron.sh'):
-        template = 'scripts/cron.sh'
-    else:
-        template = '%s/scripts/cron.sh' % env.code_root
-    files.upload_template(
-        template, env.cron_script,
-        context=env, backup=False, use_sudo=True)
-    sudo('chmod +x %s' % env.cron_script)
-    add_task(cron_name, '@daily', '', env.cron_script)
-    run('crontab /etc/cron.d/%s' % cron_name)
-
-
-@task
 @roles('task')
 def upload_celery_script():
     if isfile('scripts/runcelery.sh'):
@@ -868,20 +851,6 @@ def setup_db():
     sudo("service mysql restart")
 
 
-@roles("task")
-@task
-def setup_pngdefry():
-    """
-    Setup pngdefry
-    """
-    with cd(env.deploy_user_home):
-        run("wget %s" % PNGDEFRY_ZIP)
-        run("unzip -o %s" % PNGDEFRY_FILE)
-        run("rm %s" % PNGDEFRY_FILE)
-        with cd("pngdefry-master"):
-            sudo("make install")
-
-
 @task
 def setup():
     """
@@ -892,8 +861,8 @@ def setup():
     # ensure_deps()
     # execute(ensure_dirs)
     # execute(update_redis_conf)
-    # execute(git_seed)
-    # execute(git_reset)
+    execute(git_seed)
+    execute(git_reset)
     # execute(ensure_venv)
     # execute(ensure_nodeenv)
     # execute(ensure_npm_deps)
@@ -902,13 +871,11 @@ def setup():
     execute(upload_index_file)
     execute(migrate)
     execute(collect_static)
-    execute(setup_pngdefry)
     execute(upload_rungunicorn_script)
     execute(upload_celery_script)
     execute(upload_run_sockets_script)
     execute(upload_supervisord_conf)
     execute(upload_supervisord_celery_conf)
-    execute(upload_cron_script)
     execute(upload_nginx_conf)
     execute(reboot)
     end_time = datetime.now()
@@ -934,7 +901,6 @@ def deploy():
     execute(ensure_npm_deps)
     execute(migrate)
     execute(collect_static)
-    execute(setup_pngdefry)
     execute(upload_rungunicorn_script)
     execute(upload_celery_script)
     execute(upload_run_sockets_script)
