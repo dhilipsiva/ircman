@@ -38,9 +38,12 @@ except ImportError:
     DEBUG = False
 
 ALLOWED_HOSTS = [
+    'localhost:8100',
+    '127.0.0.1:8100',
+    '127.0.0.1',
     'localhost',
     '0.0.0.0',
-    'ircman.co'
+    'ircman.co',
 ]
 
 # Application definition
