@@ -63,7 +63,7 @@ env.deploy_user = 'ircman'
 env.deploy_user_home = join("/home", env.deploy_user)
 env.apps_path = join(env.deploy_user_home, 'apps')
 env.code_root = join(env.apps_path, env.project)
-env.sockets_path = join(env.code_root, 'sockets')
+env.sockets_path = join(env.code_root, 'node')
 env.virtenv = join(env.deploy_user_home, "envs", env.project)
 env.nodeenv = join(env.deploy_user_home, "envs", env.project + "_node")
 env.deploy_media_path = join(env.code_root, 'uploads')
@@ -282,6 +282,7 @@ def ensure_common_deps():
     require.deb.uptodate_index()
     require.deb.packages([
         "git",
+        "libicu-dev",
         "wget",
         "libmysqlclient-dev",
         "libffi-dev",
@@ -893,12 +894,12 @@ def setup():
     puts(green_bg('Start setup...'))
     start_time = datetime.now()
     ensure_deps()
-    execute(ensure_dirs)
-    execute(update_redis_conf)
-    execute(git_seed)
-    execute(git_reset)
-    execute(ensure_venv)
-    execute(ensure_nodeenv)
+    # execute(ensure_dirs)
+    # execute(update_redis_conf)
+    # execute(git_seed)
+    # execute(git_reset)
+    # execute(ensure_venv)
+    # execute(ensure_nodeenv)
     execute(ensure_npm_deps)
     execute(update_venv, True)
     execute(upload_key_files)
