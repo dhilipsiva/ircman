@@ -138,11 +138,11 @@ def get_users_for_pm(pm):
     try:
         r.append(pm.conversation.user_channel_1.user_server.user)
     except AttributeError:
-        pass
+        print "Error Fetching user %s" % pm.conversation.user_channel_1
     try:
         r.append(pm.conversation.user_channel_2.user_server.user)
     except AttributeError:
-        pass
+        print "Error Fetching user %s" % pm.conversation.user_channel_2
     return r
 
 

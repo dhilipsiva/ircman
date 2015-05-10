@@ -63,6 +63,13 @@ def notify_message_new(rooms, data):
     return notify(rooms, 'message_new', data)
 
 
+def notify_pm_new(rooms, data):
+    """
+    docstring for notify_message
+    """
+    return notify(rooms, 'pm_new', data)
+
+
 def notify_toast(rooms, toast, notify_type=NotifyEnum.INFO):
     """
     Send a toast to the user
