@@ -15,9 +15,11 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from ircman.views import index
 
 urlpatterns = [
     url(r'^foosh/', include(admin.site.urls)),
     url(r'^api/', include('tokenapi.urls')),
     url(r'^api/', include('core.urls')),
+    url(r'^.*', index, name="index"),
 ]
