@@ -1,0 +1,13 @@
+- [ ] Realtime (duh!)
+- [ ] Notifications
+- [ ] Search History
+- [ ] keyword alerts
+- [ ] file uploads
+- [ ] Search
+- [ ] reply-by-email
+- [ ] Multiple logins
+- [ ] Native clients for Mac, Windows, Linux, android, iOS and web
+- [ ] TeamChat[private]
+- [ ] poll
+- [ ] Social / Community thingy
+- [ ] Live preview - links
